@@ -17,6 +17,7 @@ class LewisStructureBuilder {
         this.draggingAtom = null;
         this.currentProblem = null;
         this.completedProblems = new Set();
+        this.nextAtomId = 1; // Counter for unique atom IDs
 
         // Atom properties
         this.atomData = {
@@ -288,6 +289,13 @@ class LewisStructureBuilder {
             btn.classList.toggle('active', btn.dataset.tool === tool);
         });
 
+        // Clear bonding state when switching tools
+        if (this.bondingAtom) {
+            this.bondingAtom = null;
+            this.selectedAtom = null;
+            this.render();
+        }
+
         // Update cursor
         if (tool === 'delete') {
             this.canvas.style.cursor = 'not-allowed';
@@ -322,7 +330,11 @@ class LewisStructureBuilder {
         document.getElementById('canvas-instructions').classList.add('hidden');
 
         if (this.selectedTool === 'select' && this.selectedElement) {
-            this.addAtom(x, y, this.selectedElement);
+            // Don't place atom on top of existing atom
+            const existingAtom = this.getAtomAt(x, y);
+            if (!existingAtom) {
+                this.addAtom(x, y, this.selectedElement);
+            }
         } else if (this.selectedTool === 'bond') {
             this.handleBondClick(x, y);
         } else if (this.selectedTool === 'lonepair') {
@@ -360,12 +372,19 @@ class LewisStructureBuilder {
 
     handleMouseUp(e) {
         this.draggingAtom = null;
-        this.canvas.style.cursor = this.selectedTool === 'select' ? 'crosshair' : 'pointer';
+        // Restore correct cursor based on current tool
+        if (this.selectedTool === 'delete') {
+            this.canvas.style.cursor = 'not-allowed';
+        } else if (this.selectedTool === 'bond' || this.selectedTool === 'lonepair') {
+            this.canvas.style.cursor = 'pointer';
+        } else {
+            this.canvas.style.cursor = 'crosshair';
+        }
     }
 
     addAtom(x, y, element) {
         const atom = {
-            id: Date.now(),
+            id: this.nextAtomId++,
             element,
             x,
             y,
@@ -480,9 +499,12 @@ class LewisStructureBuilder {
     isPointNearBond(x, y, bond) {
         const dx = bond.atom2.x - bond.atom1.x;
         const dy = bond.atom2.y - bond.atom1.y;
-        const len = Math.sqrt(dx * dx + dy * dy);
+        const lenSq = dx * dx + dy * dy;
 
-        const t = Math.max(0, Math.min(1, ((x - bond.atom1.x) * dx + (y - bond.atom1.y) * dy) / (len * len)));
+        // Protect against division by zero if atoms overlap
+        if (lenSq < 1) return false;
+
+        const t = Math.max(0, Math.min(1, ((x - bond.atom1.x) * dx + (y - bond.atom1.y) * dy) / lenSq));
         const nearestX = bond.atom1.x + t * dx;
         const nearestY = bond.atom1.y + t * dy;
 
@@ -637,11 +659,14 @@ class LewisStructureBuilder {
                 return Math.atan2(other.y - atom.y, other.x - atom.x);
             });
 
-        // Find positions furthest from bonds
+        // Find positions furthest from bonds (with proper angle wrapping)
         const availablePositions = positions.filter(pos => {
             return !bondAngles.some(bondAngle => {
-                const diff = Math.abs(pos.angle - bondAngle);
-                return diff < 0.5 || diff > Math.PI * 2 - 0.5;
+                // Normalize angle difference to handle wrapping (-π to π)
+                let diff = pos.angle - bondAngle;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                return Math.abs(diff) < 0.5;
             });
         });
 
@@ -677,6 +702,9 @@ class LewisStructureBuilder {
         const dx = atom2.x - atom1.x;
         const dy = atom2.y - atom1.y;
         const len = Math.sqrt(dx * dx + dy * dy);
+
+        // Protect against division by zero if atoms overlap
+        if (len < 1) return;
 
         const nx = dx / len;
         const ny = dy / len;
@@ -945,7 +973,8 @@ class LewisStructureBuilder {
     showSuccess() {
         const modal = document.getElementById('success-modal');
 
-        const totalElectrons = this.atoms.reduce((sum, a) => sum + a.valence, 0);
+        // Account for molecule charge in total electrons
+        const totalElectrons = this.atoms.reduce((sum, a) => sum + a.valence, 0) - this.moleculeCharge;
         const bondCount = this.bonds.reduce((sum, b) => sum + b.type, 0);
         const lonePairCount = this.atoms.reduce((sum, a) => sum + a.lonePairs, 0);
 
@@ -978,6 +1007,7 @@ class LewisStructureBuilder {
         this.bondingAtom = null;
         this.selectedAtom = null;
         this.hintIndex = 0;
+        this.nextAtomId = 1; // Reset atom ID counter
 
         if (clearProblem) {
             this.currentProblem = null;
