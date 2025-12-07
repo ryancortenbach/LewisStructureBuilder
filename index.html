@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lewis Structure Builder - Interactive Chemistry Learning Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>Lewis Structure Builder</h1>
+                <p class="tagline">Interactive Teaching Tool for Chemical Bonding</p>
+            </div>
+            <div class="header-actions">
+                <button id="tutorial-btn" class="btn btn-secondary">
+                    <span class="icon">?</span> Tutorial
+                </button>
+                <button id="reset-btn" class="btn btn-secondary">
+                    <span class="icon">↺</span> Reset
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Left Panel - Toolbox -->
+            <aside class="toolbox">
+                <div class="toolbox-section">
+                    <h3>Atoms</h3>
+                    <p class="toolbox-hint">Click to select, then click on canvas to place</p>
+                    <div class="atom-palette">
+                        <button class="atom-btn" data-element="H" data-valence="1">
+                            <span class="atom-symbol">H</span>
+                            <span class="atom-info">1 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="C" data-valence="4">
+                            <span class="atom-symbol">C</span>
+                            <span class="atom-info">4 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="N" data-valence="5">
+                            <span class="atom-symbol">N</span>
+                            <span class="atom-info">5 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="O" data-valence="6">
+                            <span class="atom-symbol">O</span>
+                            <span class="atom-info">6 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="F" data-valence="7">
+                            <span class="atom-symbol">F</span>
+                            <span class="atom-info">7 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="Cl" data-valence="7">
+                            <span class="atom-symbol">Cl</span>
+                            <span class="atom-info">7 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="Br" data-valence="7">
+                            <span class="atom-symbol">Br</span>
+                            <span class="atom-info">7 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="S" data-valence="6">
+                            <span class="atom-symbol">S</span>
+                            <span class="atom-info">6 e⁻</span>
+                        </button>
+                        <button class="atom-btn" data-element="P" data-valence="5">
+                            <span class="atom-symbol">P</span>
+                            <span class="atom-info">5 e⁻</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="toolbox-section">
+                    <h3>Tools</h3>
+                    <div class="tool-buttons">
+                        <button class="tool-btn active" data-tool="select" title="Select & Move">
+                            <span class="tool-icon">⊙</span>
+                            <span>Select</span>
+                        </button>
+                        <button class="tool-btn" data-tool="bond" title="Add Bond">
+                            <span class="tool-icon">―</span>
+                            <span>Bond</span>
+                        </button>
+                        <button class="tool-btn" data-tool="lonepair" title="Add Lone Pair">
+                            <span class="tool-icon">∷</span>
+                            <span>Lone Pair</span>
+                        </button>
+                        <button class="tool-btn" data-tool="delete" title="Delete">
+                            <span class="tool-icon">✕</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="toolbox-section">
+                    <h3>Bond Type</h3>
+                    <div class="bond-selector">
+                        <button class="bond-btn active" data-bonds="1">
+                            <span class="bond-visual">―</span>
+                            <span>Single</span>
+                        </button>
+                        <button class="bond-btn" data-bonds="2">
+                            <span class="bond-visual">=</span>
+                            <span>Double</span>
+                        </button>
+                        <button class="bond-btn" data-bonds="3">
+                            <span class="bond-visual">≡</span>
+                            <span>Triple</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="toolbox-section">
+                    <h3>Molecule Charge</h3>
+                    <div class="charge-selector">
+                        <button class="charge-btn" data-charge="-2">2-</button>
+                        <button class="charge-btn" data-charge="-1">1-</button>
+                        <button class="charge-btn active" data-charge="0">0</button>
+                        <button class="charge-btn" data-charge="1">1+</button>
+                        <button class="charge-btn" data-charge="2">2+</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center - Canvas -->
+            <div class="canvas-container">
+                <div class="canvas-header">
+                    <div class="electron-counter">
+                        <div class="counter-item">
+                            <span class="counter-label">Total Valence e⁻</span>
+                            <span class="counter-value" id="total-electrons">0</span>
+                        </div>
+                        <div class="counter-item">
+                            <span class="counter-label">Used e⁻</span>
+                            <span class="counter-value" id="used-electrons">0</span>
+                        </div>
+                        <div class="counter-item">
+                            <span class="counter-label">Remaining</span>
+                            <span class="counter-value" id="remaining-electrons">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="lewis-canvas" width="600" height="450"></canvas>
+                    <div class="canvas-instructions" id="canvas-instructions">
+                        <p>Select an atom from the left panel and click here to place it</p>
+                        <p class="hint">Or try a practice problem from the right panel →</p>
+                    </div>
+                </div>
+                <div class="canvas-footer">
+                    <button id="check-structure" class="btn btn-primary">
+                        <span class="icon">✓</span> Check Structure
+                    </button>
+                    <button id="show-hint" class="btn btn-secondary">
+                        <span class="icon">💡</span> Show Hint
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel - Practice & Feedback -->
+            <aside class="practice-panel">
+                <div class="panel-section">
+                    <h3>Practice Problems</h3>
+                    <div class="problem-list">
+                        <button class="problem-btn" data-problem="h2o">
+                            <span class="problem-formula">H₂O</span>
+                            <span class="problem-name">Water</span>
+                            <span class="difficulty easy">Easy</span>
+                        </button>
+                        <button class="problem-btn" data-problem="nh3">
+                            <span class="problem-formula">NH₃</span>
+                            <span class="problem-name">Ammonia</span>
+                            <span class="difficulty easy">Easy</span>
+                        </button>
+                        <button class="problem-btn" data-problem="ch4">
+                            <span class="problem-formula">CH₄</span>
+                            <span class="problem-name">Methane</span>
+                            <span class="difficulty easy">Easy</span>
+                        </button>
+                        <button class="problem-btn" data-problem="hcl">
+                            <span class="problem-formula">HCl</span>
+                            <span class="problem-name">Hydrogen Chloride</span>
+                            <span class="difficulty easy">Easy</span>
+                        </button>
+                        <button class="problem-btn" data-problem="co2">
+                            <span class="problem-formula">CO₂</span>
+                            <span class="problem-name">Carbon Dioxide</span>
+                            <span class="difficulty medium">Medium</span>
+                        </button>
+                        <button class="problem-btn" data-problem="hcn">
+                            <span class="problem-formula">HCN</span>
+                            <span class="problem-name">Hydrogen Cyanide</span>
+                            <span class="difficulty medium">Medium</span>
+                        </button>
+                        <button class="problem-btn" data-problem="h2co">
+                            <span class="problem-formula">H₂CO</span>
+                            <span class="problem-name">Formaldehyde</span>
+                            <span class="difficulty medium">Medium</span>
+                        </button>
+                        <button class="problem-btn" data-problem="n2">
+                            <span class="problem-formula">N₂</span>
+                            <span class="problem-name">Nitrogen</span>
+                            <span class="difficulty medium">Medium</span>
+                        </button>
+                        <button class="problem-btn" data-problem="o3">
+                            <span class="problem-formula">O₃</span>
+                            <span class="problem-name">Ozone</span>
+                            <span class="difficulty hard">Hard</span>
+                        </button>
+                        <button class="problem-btn" data-problem="no3">
+                            <span class="problem-formula">NO₃⁻</span>
+                            <span class="problem-name">Nitrate Ion</span>
+                            <span class="difficulty hard">Hard</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section" id="feedback-section">
+                    <h3>Feedback</h3>
+                    <div class="feedback-content" id="feedback-content">
+                        <div class="feedback-placeholder">
+                            <p>Build a structure and click "Check Structure" to get feedback</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Atom Status</h3>
+                    <div class="atom-status" id="atom-status">
+                        <p class="status-placeholder">Place atoms to see their electron status</p>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Tutorial Modal -->
+        <div id="tutorial-modal" class="modal">
+            <div class="modal-content tutorial-modal-content">
+                <button class="modal-close">&times;</button>
+                <div class="tutorial-container">
+                    <div class="tutorial-step active" data-step="1">
+                        <h2>Welcome to Lewis Structure Builder!</h2>
+                        <div class="tutorial-image">
+                            <div class="demo-atoms">
+                                <span class="demo-atom">H</span>
+                                <span class="demo-bond">―</span>
+                                <span class="demo-atom">O</span>
+                                <span class="demo-bond">―</span>
+                                <span class="demo-atom">H</span>
+                            </div>
+                        </div>
+                        <p>This interactive tool helps you learn to draw Lewis structures by building them yourself.</p>
+                        <p>You'll place atoms, add bonds, and add lone pairs - just like drawing on paper, but with instant feedback!</p>
+                    </div>
+
+                    <div class="tutorial-step" data-step="2">
+                        <h2>Step 1: Place Atoms</h2>
+                        <div class="tutorial-demo">
+                            <div class="demo-panel">
+                                <div class="demo-atom-btn">
+                                    <span>O</span>
+                                    <small>6 e⁻</small>
+                                </div>
+                            </div>
+                            <span class="demo-arrow">→</span>
+                            <div class="demo-canvas">
+                                <span class="placed-atom">O</span>
+                            </div>
+                        </div>
+                        <p><strong>Click an atom</strong> in the left panel to select it, then <strong>click on the canvas</strong> to place it.</p>
+                        <p>The number shows how many valence electrons each atom contributes.</p>
+                    </div>
+
+                    <div class="tutorial-step" data-step="3">
+                        <h2>Step 2: Add Bonds</h2>
+                        <div class="tutorial-demo">
+                            <div class="demo-bonding">
+                                <span class="demo-atom">H</span>
+                                <span class="demo-atom">O</span>
+                            </div>
+                            <span class="demo-arrow">→</span>
+                            <div class="demo-bonding">
+                                <span class="demo-atom">H</span>
+                                <span class="demo-bond">―</span>
+                                <span class="demo-atom">O</span>
+                            </div>
+                        </div>
+                        <p>Select the <strong>Bond tool</strong>, choose single/double/triple, then <strong>click two atoms</strong> to connect them.</p>
+                        <p>Each bond uses 2 electrons (shared between atoms).</p>
+                    </div>
+
+                    <div class="tutorial-step" data-step="4">
+                        <h2>Step 3: Add Lone Pairs</h2>
+                        <div class="tutorial-demo">
+                            <div class="demo-lonepair">
+                                <span class="demo-atom">O</span>
+                                <div class="demo-dots">
+                                    <span>••</span>
+                                    <span>••</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Select the <strong>Lone Pair tool</strong>, then <strong>click an atom</strong> to add non-bonding electron pairs.</p>
+                        <p>Each lone pair is 2 electrons that belong only to that atom.</p>
+                    </div>
+
+                    <div class="tutorial-step" data-step="5">
+                        <h2>Step 4: Check Your Work</h2>
+                        <div class="tutorial-demo">
+                            <div class="demo-feedback success">
+                                <span class="checkmark">✓</span>
+                                <span>All atoms satisfy the octet rule!</span>
+                            </div>
+                        </div>
+                        <p>Click <strong>"Check Structure"</strong> to verify your Lewis structure.</p>
+                        <p>The tool will tell you if each atom has the right number of electrons and suggest fixes.</p>
+                    </div>
+
+                    <div class="tutorial-step" data-step="6">
+                        <h2>Ready to Start!</h2>
+                        <div class="tutorial-demo">
+                            <div class="demo-problems">
+                                <span class="demo-problem">H₂O</span>
+                                <span class="demo-problem">CO₂</span>
+                                <span class="demo-problem">NH₃</span>
+                            </div>
+                        </div>
+                        <p>Try the <strong>Practice Problems</strong> on the right to test your skills!</p>
+                        <p>Start with easy molecules and work your way up. Use <strong>hints</strong> if you get stuck.</p>
+                    </div>
+
+                    <div class="tutorial-nav">
+                        <button class="btn btn-secondary" id="tutorial-prev" disabled>← Previous</button>
+                        <div class="tutorial-dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <button class="btn btn-primary" id="tutorial-next">Next →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="success-modal" class="modal">
+            <div class="modal-content success-modal-content">
+                <div class="success-icon">🎉</div>
+                <h2>Correct!</h2>
+                <p id="success-message">You've successfully drawn the Lewis structure!</p>
+                <div class="success-stats">
+                    <div class="stat">
+                        <span class="stat-value" id="success-electrons">0</span>
+                        <span class="stat-label">Valence e⁻</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="success-bonds">0</span>
+                        <span class="stat-label">Bonds</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="success-lonepairs">0</span>
+                        <span class="stat-label">Lone Pairs</span>
+                    </div>
+                </div>
+                <div class="success-actions">
+                    <button class="btn btn-primary" id="next-problem">Next Problem</button>
+                    <button class="btn btn-secondary" id="close-success">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
